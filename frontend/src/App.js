@@ -99,6 +99,7 @@ function AppRoutes() {
       <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><Reports /></ProtectedRoute>} />
       <Route path="/admin/gps" element={<ProtectedRoute requiredRole="admin"><GPSTracking /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute requiredRole="super_admin"><UserManagement /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
 
       {/* Rider Routes */}
       <Route path="/rider" element={<ProtectedRoute requiredRole="rider"><RiderPOS /></ProtectedRoute>} />
