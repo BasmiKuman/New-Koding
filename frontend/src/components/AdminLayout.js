@@ -12,199 +12,214 @@ import {
   AlertTriangle,
   BarChart3,
   Users,
-  Settings,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
+  MapPin,
   Menu,
-  X,
-  ShoppingCart,
-  MapPin
+  X
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Produk', href: '/admin/products', icon: Package },
-  { name: 'Produksi', href: '/admin/production', icon: Factory },
-  { name: 'Distribusi', href: '/admin/distribution', icon: Truck },
-  { name: 'Stock Opname', href: '/admin/stock-opname', icon: ClipboardList },
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'primary' },
+  { name: 'Produk', href: '/admin/products', icon: Package, color: 'accent' },
+  { name: 'Produksi', href: '/admin/production', icon: Factory, color: 'secondary' },
+  { name: 'Distribusi', href: '/admin/distribution', icon: Truck, color: 'purple' },
+  { name: 'Opname', href: '/admin/stock-opname', icon: ClipboardList, color: 'primary' },
+];
+
+const moreNavigation = [
   { name: 'Return', href: '/admin/returns', icon: Undo2 },
-  { name: 'Reject/Rusak', href: '/admin/rejects', icon: AlertTriangle },
+  { name: 'Reject', href: '/admin/rejects', icon: AlertTriangle },
   { name: 'Laporan', href: '/admin/reports', icon: BarChart3 },
-  { name: 'GPS Tracking', href: '/admin/gps', icon: MapPin },
+  { name: 'GPS', href: '/admin/gps', icon: MapPin },
 ];
 
 const superAdminNav = [
-  { name: 'Kelola User', href: '/admin/users', icon: Users },
+  { name: 'Users', href: '/admin/users', icon: Users },
 ];
 
 export default function AdminLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [moreOpen, setMoreOpen] = React.useState(false);
   const { user, logout, isSuperAdmin } = useAuth();
   const location = useLocation();
 
-  const allNav = isSuperAdmin ? [...navigation, ...superAdminNav] : navigation;
+  const allMoreNav = isSuperAdmin ? [...moreNavigation, ...superAdminNav] : moreNavigation;
+
+  const getActiveColor = (color) => {
+    const colors = {
+      primary: 'text-blue-600 bg-blue-50',
+      secondary: 'text-green-600 bg-green-50',
+      accent: 'text-orange-500 bg-orange-50',
+      purple: 'text-purple-600 bg-purple-50',
+      default: 'text-blue-600 bg-blue-50',
+    };
+    return colors[color] || colors.default;
+  };
+
+  const isActive = (path) => location.pathname === path;
+  const isMoreActive = allMoreNav.some(item => location.pathname === item.href);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div className="flex items-center justify-between h-14 px-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <span className="font-bold text-gray-900 dark:text-white">POS Rider</span>
+              <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Admin Panel</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.full_name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role?.replace('_', ' ')}</p>
+            </div>
+            <div className="w-9 h-9 bg-gradient-primary rounded-full flex items-center justify-center shadow-md">
+              <span className="text-white font-semibold text-sm">
+                {user?.full_name?.charAt(0)?.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* More Menu Modal */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMoreOpen(false)}>
+          <div 
+            className="absolute bottom-20 left-4 right-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 animate-slide-up"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Menu Lainnya</h3>
+              <button onClick={() => setMoreOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {allMoreNav.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setMoreOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-xl transition-all",
+                    isActive(item.href)
+                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  )}
+                >
+                  <item.icon className="w-6 h-6" />
+                  <span className="text-xs font-medium">{item.name}</span>
+                </Link>
+              ))}
+              <button
+                onClick={() => { setMoreOpen(false); logout(); }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+              >
+                <LogOut className="w-6 h-6" />
+                <span className="text-xs font-medium">Keluar</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Mobile sidebar */}
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 lg:hidden",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex items-center justify-between h-16 px-4 border-b">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-lg">POS Rider</span>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
-            <X className="w-5 h-5" />
-          </Button>
+      {/* Page content */}
+      <main className="pb-nav-safe">
+        <div className="p-4 max-w-7xl mx-auto animate-fade-in">
+          {children}
         </div>
-        <nav className="p-4 space-y-1">
-          {allNav.map((item) => {
-            const isActive = location.pathname === item.href;
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-gray-200/50 dark:border-gray-700/50 shadow-xl">
+        {/* Decorative top border */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
+        
+        <div 
+          className="flex items-center justify-evenly h-16 max-w-screen-xl mx-auto"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          {navigation.map((item, index) => {
+            const active = isActive(item.href);
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
-                onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
+                  "group relative flex flex-col items-center justify-center flex-1 h-full min-w-[3.5rem] max-w-[5rem] px-1 space-y-1 transition-all duration-300",
+                  "hover:scale-105 active:scale-95"
                 )}
               >
-                <item.icon className="w-5 h-5" />
-                {item.name}
+                {active && (
+                  <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-600 animate-bounce-in" />
+                )}
+                <div className={cn(
+                  "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+                  active 
+                    ? cn(getActiveColor(item.color), "shadow-md scale-110") 
+                    : "text-gray-400 group-hover:bg-gray-100 dark:group-hover:bg-gray-800 group-hover:text-gray-600"
+                )}>
+                  {active && (
+                    <div className={cn(
+                      "absolute inset-0 rounded-xl blur-sm opacity-50 animate-pulse-slow",
+                      item.color === 'primary' && "bg-blue-500/30",
+                      item.color === 'secondary' && "bg-green-500/30",
+                      item.color === 'accent' && "bg-orange-500/30",
+                      item.color === 'purple' && "bg-purple-500/30"
+                    )} />
+                  )}
+                  <item.icon className={cn(
+                    "w-5 h-5 relative z-10 transition-transform duration-300",
+                    active && "animate-scale-in"
+                  )} />
+                </div>
+                <span className={cn(
+                  "text-[0.6rem] sm:text-xs font-semibold text-center leading-tight truncate max-w-full transition-all duration-300",
+                  active ? "text-gray-900 dark:text-white" : "text-gray-400 group-hover:text-gray-600"
+                )}>
+                  {item.name}
+                </span>
+                {active && (
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full animate-fade-in" />
+                )}
               </Link>
             );
           })}
-        </nav>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div
-        className={cn(
-          "hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-white border-r transition-all duration-300",
-          collapsed ? "lg:w-20" : "lg:w-64"
-        )}
-      >
-        <div className="flex items-center justify-between h-16 px-4 border-b">
-          {!collapsed && (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-lg">POS Rider</span>
-            </div>
-          )}
-          {collapsed && (
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center mx-auto">
-              <ShoppingCart className="w-5 h-5 text-white" />
-            </div>
-          )}
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {allNav.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100",
-                  collapsed && "justify-center px-2"
-                )}
-                title={collapsed ? item.name : undefined}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t">
+          
+          {/* More Button */}
           <button
-            onClick={logout}
+            onClick={() => setMoreOpen(true)}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full transition-colors",
-              collapsed && "justify-center px-2"
+              "group relative flex flex-col items-center justify-center flex-1 h-full min-w-[3.5rem] max-w-[5rem] px-1 space-y-1 transition-all duration-300",
+              "hover:scale-105 active:scale-95"
             )}
           >
-            <LogOut className="w-5 h-5" />
-            {!collapsed && "Keluar"}
+            {isMoreActive && (
+              <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-600 animate-bounce-in" />
+            )}
+            <div className={cn(
+              "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+              isMoreActive 
+                ? "bg-blue-50 text-blue-600 shadow-md scale-110" 
+                : "text-gray-400 group-hover:bg-gray-100 dark:group-hover:bg-gray-800 group-hover:text-gray-600"
+            )}>
+              <Menu className="w-5 h-5 relative z-10" />
+            </div>
+            <span className={cn(
+              "text-[0.6rem] sm:text-xs font-semibold text-center leading-tight truncate max-w-full transition-all duration-300",
+              isMoreActive ? "text-gray-900 dark:text-white" : "text-gray-400 group-hover:text-gray-600"
+            )}>
+              Lainnya
+            </span>
           </button>
         </div>
-
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white border rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
-      </div>
-
-      {/* Main content */}
-      <div className={cn(
-        "transition-all duration-300",
-        collapsed ? "lg:pl-20" : "lg:pl-64"
-      )}>
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white border-b">
-          <div className="flex items-center justify-between h-16 px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-
-            <div className="flex items-center gap-4 ml-auto">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
-              </div>
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-semibold">
-                  {user?.full_name?.charAt(0)?.toUpperCase()}
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Page content */}
-        <main className="p-4 lg:p-6">
-          {children}
-        </main>
-      </div>
+      </nav>
     </div>
   );
 }
