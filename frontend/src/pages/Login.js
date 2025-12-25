@@ -34,58 +34,59 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[hsl(270,70%,60%)]/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl animate-fade-in-up">
+      <Card className="w-full max-w-md relative z-10 shadow-xl border-border/50 bg-card/80 backdrop-blur-xl animate-fade-in-up">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow animate-bounce-in">
+          <div className="mx-auto w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow animate-bounce-in hover-scale">
             <Package className="w-10 h-10 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold text-gradient-shine">
             POS Rider
           </CardTitle>
-          <CardDescription className="text-gray-500 dark:text-gray-400">
+          <CardDescription className="text-muted-foreground">
             Sistem Point of Sale untuk Distribusi
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm animate-fade-in">
+              <div className="p-3 rounded-xl bg-destructive/10 text-destructive text-sm animate-fade-in border border-destructive/20">
                 {error}
               </div>
             )}
             
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <label className="text-sm font-medium text-foreground">Email</label>
+              <div className="relative group">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="email"
                   placeholder="email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-11 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
+                  className="pl-11 h-12 bg-muted/50 border-border rounded-xl focus:border-primary focus:ring-primary/20 transition-all"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <label className="text-sm font-medium text-foreground">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-11 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
+                  className="pl-11 h-12 bg-muted/50 border-border rounded-xl focus:border-primary focus:ring-primary/20 transition-all"
                   required
                 />
               </div>
@@ -93,7 +94,7 @@ export default function Login() {
 
             <Button 
               type="submit" 
-              className="w-full h-12 bg-gradient-primary hover:opacity-90 shadow-glow text-white font-semibold rounded-xl transition-all duration-300" 
+              className="w-full h-12 bg-gradient-primary hover:opacity-90 shadow-glow text-white font-semibold rounded-xl transition-all duration-300 hover-lift" 
               disabled={loading}
             >
               {loading ? (
@@ -108,26 +109,30 @@ export default function Login() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Belum punya akun?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link to="/register" className="text-primary hover:text-primary/80 font-semibold transition-colors">
                 Daftar di sini
               </Link>
             </p>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-3">Demo Account</p>
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-xs text-muted-foreground text-center mb-3">Demo Account</p>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                <p className="font-semibold text-blue-600 dark:text-blue-400 mb-1">Super Admin</p>
-                <p className="text-gray-600 dark:text-gray-400">superadmin@pos.com</p>
-                <p className="text-gray-500 dark:text-gray-500">admin123</p>
+              <div className="p-3 bg-primary/10 rounded-xl border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer hover-lift"
+                onClick={() => { setEmail('superadmin@pos.com'); setPassword('admin123'); }}
+              >
+                <p className="font-semibold text-primary mb-1">Super Admin</p>
+                <p className="text-muted-foreground">superadmin@pos.com</p>
+                <p className="text-muted-foreground/70">admin123</p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
-                <p className="font-semibold text-green-600 dark:text-green-400 mb-1">Rider</p>
-                <p className="text-gray-600 dark:text-gray-400">rider1@pos.com</p>
-                <p className="text-gray-500 dark:text-gray-500">rider123</p>
+              <div className="p-3 bg-secondary/10 rounded-xl border border-secondary/20 hover:border-secondary/40 transition-colors cursor-pointer hover-lift"
+                onClick={() => { setEmail('rider1@pos.com'); setPassword('rider123'); }}
+              >
+                <p className="font-semibold text-secondary mb-1">Rider</p>
+                <p className="text-muted-foreground">rider1@pos.com</p>
+                <p className="text-muted-foreground/70">rider123</p>
               </div>
             </div>
           </div>
