@@ -17,6 +17,7 @@ import Rejects from './pages/admin/Rejects';
 import Reports from './pages/admin/Reports';
 import GPSTracking from './pages/admin/GPSTracking';
 import UserManagement from './pages/admin/UserManagement';
+import AdminSettings from './pages/admin/Settings';
 
 // Rider Pages
 import RiderPOS from './pages/rider/POS';
