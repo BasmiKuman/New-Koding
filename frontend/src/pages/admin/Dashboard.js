@@ -10,7 +10,12 @@ import {
   AlertTriangle,
   Sparkles,
   Undo2,
-  RefreshCw
+  RefreshCw,
+  Trophy,
+  Crown,
+  Award,
+  Medal,
+  User
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
@@ -69,23 +74,97 @@ const StatsCard = ({ title, value, icon: Icon, variant = 'default' }) => {
   );
 };
 
+// Leaderboard Card Component
+const LeaderboardCard = ({ leaderboard, loading }) => {
+  const getRankStyle = (index) => {
+    switch(index) {
+      case 0: return 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white';
+      case 1: return 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-700';
+      case 2: return 'bg-gradient-to-br from-orange-400 to-orange-500 text-white';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getRankIcon = (index) => {
+    if (index === 0) return <Crown className="w-4 h-4" />;
+    if (index === 1) return <Award className="w-4 h-4" />;
+    if (index === 2) return <Medal className="w-4 h-4" />;
+    return <span className="text-xs font-bold">{index + 1}</span>;
+  };
+
+  return (
+    <Card className="overflow-hidden border-border/50 hover:shadow-md transition-all duration-300">
+      <CardHeader className="bg-gradient-to-r from-accent/5 to-transparent pb-2">
+        <CardTitle className="flex items-center gap-2 text-foreground">
+          <div className="w-8 h-8 rounded-lg bg-gradient-accent flex items-center justify-center">
+            <Trophy className="w-4 h-4 text-white" />
+          </div>
+          Leaderboard Rider
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-2">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : leaderboard.length === 0 ? (
+          <p className="text-muted-foreground text-center py-6">Belum ada data penjualan</p>
+        ) : (
+          <div className="space-y-2">
+            {leaderboard.slice(0, 5).map((rider, index) => (
+              <div
+                key={rider.rider_id}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover-lift animate-fade-in-up ${
+                  index < 3 ? 'bg-muted/50' : 'bg-muted/30'
+                }`}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getRankStyle(index)}`}>
+                  {getRankIcon(index)}
+                </div>
+                <div className="w-9 h-9 bg-muted rounded-full flex items-center justify-center overflow-hidden">
+                  {rider.avatar_url ? (
+                    <img src={rider.avatar_url} alt={rider.full_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-foreground truncate">{rider.full_name}</p>
+                  <p className="text-xs text-muted-foreground">{rider.total_transactions} transaksi</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-sm text-secondary">{formatCurrency(rider.total_sales)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [pendingReturns, setPendingReturns] = useState([]);
   const [pendingRejects, setPendingRejects] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [summaryRes, returnsRes, rejectsRes] = await Promise.all([
+      const [summaryRes, returnsRes, rejectsRes, leaderboardRes] = await Promise.all([
         reportsAPI.getSummary({}),
         returnsAPI.getAll('pending'),
-        rejectsAPI.getAll('pending')
+        rejectsAPI.getAll('pending'),
+        reportsAPI.getLeaderboard({})
       ]);
       setStats(summaryRes.data);
       setPendingReturns(returnsRes.data);
       setPendingRejects(rejectsRes.data);
+      setLeaderboard(leaderboardRes.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -153,37 +232,37 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Pending Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Pending Returns */}
           <Card className="overflow-hidden border-border/50 hover:shadow-md transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-accent/5 to-transparent">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <div className="w-8 h-8 rounded-lg bg-gradient-accent flex items-center justify-center">
-                  <Undo2 className="w-4 h-4 text-white" />
+            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-accent/5 to-transparent pb-2">
+              <CardTitle className="flex items-center gap-2 text-foreground text-sm">
+                <div className="w-7 h-7 rounded-lg bg-gradient-accent flex items-center justify-center">
+                  <Undo2 className="w-3.5 h-3.5 text-white" />
                 </div>
                 Return Menunggu
                 {pendingReturns.length > 0 && (
-                  <Badge variant="warning" className="ml-2">{pendingReturns.length}</Badge>
+                  <Badge variant="warning" className="ml-1">{pendingReturns.length}</Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2">
               {pendingReturns.length === 0 ? (
-                <p className="text-muted-foreground text-center py-6">Tidak ada return menunggu</p>
+                <p className="text-muted-foreground text-center py-4 text-sm">Tidak ada return menunggu</p>
               ) : (
-                <div className="space-y-3">
-                  {pendingReturns.slice(0, 5).map((ret, index) => (
+                <div className="space-y-2">
+                  {pendingReturns.slice(0, 4).map((ret, index) => (
                     <div 
                       key={ret.id} 
-                      className="flex items-center justify-between p-3 bg-muted/50 rounded-xl hover:bg-muted/80 transition-colors duration-200 animate-fade-in-up"
+                      className="flex items-center justify-between p-2.5 bg-muted/50 rounded-xl hover:bg-muted/80 transition-colors duration-200 animate-fade-in-up"
                       style={{ animationDelay: `${(index + 5) * 50}ms` }}
                     >
-                      <div>
-                        <p className="font-medium text-foreground">{ret.products?.name}</p>
-                        <p className="text-sm text-muted-foreground">{ret.profiles?.full_name} - {ret.quantity} pcs</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-foreground text-sm truncate">{ret.products?.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{ret.profiles?.full_name} - {ret.quantity} pcs</p>
                       </div>
-                      <Badge variant="warning">Pending</Badge>
+                      <Badge variant="warning" className="text-[10px] ml-2">Pending</Badge>
                     </div>
                   ))}
                 </div>
@@ -193,39 +272,44 @@ export default function AdminDashboard() {
 
           {/* Pending Rejects */}
           <Card className="overflow-hidden border-border/50 hover:shadow-md transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
-            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-destructive/5 to-transparent">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-destructive to-red-400 flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4 text-white" />
+            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-destructive/5 to-transparent pb-2">
+              <CardTitle className="flex items-center gap-2 text-foreground text-sm">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-destructive to-red-400 flex items-center justify-center">
+                  <AlertTriangle className="w-3.5 h-3.5 text-white" />
                 </div>
                 Reject Menunggu
                 {pendingRejects.length > 0 && (
-                  <Badge variant="destructive" className="ml-2">{pendingRejects.length}</Badge>
+                  <Badge variant="destructive" className="ml-1">{pendingRejects.length}</Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2">
               {pendingRejects.length === 0 ? (
-                <p className="text-muted-foreground text-center py-6">Tidak ada reject menunggu</p>
+                <p className="text-muted-foreground text-center py-4 text-sm">Tidak ada reject menunggu</p>
               ) : (
-                <div className="space-y-3">
-                  {pendingRejects.slice(0, 5).map((rej, index) => (
+                <div className="space-y-2">
+                  {pendingRejects.slice(0, 4).map((rej, index) => (
                     <div 
                       key={rej.id} 
-                      className="flex items-center justify-between p-3 bg-muted/50 rounded-xl hover:bg-muted/80 transition-colors duration-200 animate-fade-in-up"
+                      className="flex items-center justify-between p-2.5 bg-muted/50 rounded-xl hover:bg-muted/80 transition-colors duration-200 animate-fade-in-up"
                       style={{ animationDelay: `${(index + 5) * 50}ms` }}
                     >
-                      <div>
-                        <p className="font-medium text-foreground">{rej.products?.name}</p>
-                        <p className="text-sm text-muted-foreground">{rej.profiles?.full_name} - {rej.quantity} pcs</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-foreground text-sm truncate">{rej.products?.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{rej.profiles?.full_name} - {rej.quantity} pcs</p>
                       </div>
-                      <Badge variant="destructive">Pending</Badge>
+                      <Badge variant="destructive" className="text-[10px] ml-2">Pending</Badge>
                     </div>
                   ))}
                 </div>
               )}
             </CardContent>
           </Card>
+
+          {/* Leaderboard */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+            <LeaderboardCard leaderboard={leaderboard} loading={loading} />
+          </div>
         </div>
       </div>
     </AdminLayout>
